@@ -4,49 +4,102 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Achi's creation - Admin Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root { --cream: #FDF8F0; --warm-white: #FFFCF7; --terracotta: #C4715A; --chocolate: #4A2C1A; --ink: #1A0F08; --shadow: rgba(74,44,26,0.12); }
+  :root { 
+    --cream: #FDF8F0; --warm-white: #FFFCF7; --blush: #F4D4C4; --rose: #E8A898;
+    --terracotta: #C4715A; --saffron: #E8A030; --gold: #C8942A; --deep-gold: #9A6F1E;
+    --chocolate: #4A2C1A; --ink: #1A0F08; --shadow: rgba(74,44,26,0.12); 
+    --shadow-md: rgba(74,44,26,0.2); --transition: cubic-bezier(0.4, 0, 0.2, 1);
+    --bot-bg: linear-gradient(135deg, var(--blush), var(--terracotta));
+    --bot-bubble-bg: white; --bot-bubble-text: var(--chocolate);
+  }
+  
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DM Sans', sans-serif; }
-  body { background: var(--cream); color: var(--ink); padding: 40px 20px; }
-  .admin-container { max-width: 800px; background: var(--warm-white); margin: 0 auto; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px var(--shadow); }
+  body { background: var(--cream); color: var(--ink); padding: 40px 20px; position: relative; min-height: 100vh; }
+  .admin-container { max-width: 800px; background: var(--warm-white); margin: 0 auto 40px auto; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px var(--shadow); border: 1px solid rgba(200,148,42,0.15); }
   h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--terracotta); text-align: center; margin-bottom: 30px; }
+  h2 em { font-style: italic; color: var(--gold); }
+  
   .form-group { margin-bottom: 22px; }
-  label { display: block; font-size: 0.88rem; font-weight: 500; color: var(--chocolate); margin-bottom: 8px; }
-  input[type="text"], select { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(74,44,26,0.15); background: transparent; font-size: 0.95rem; outline: none; }
+  label { display: block; font-size: 0.88rem; font-weight: 500; color: var(--chocolate); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+  input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(74,44,26,0.15); background: var(--cream); font-size: 0.95rem; outline: none; color: var(--ink); }
+  input:focus, select:focus, textarea:focus { border-color: var(--terracotta); }
+  
   .file-drop-area { position: relative; display: flex; align-items: center; justify-content: center; padding: 25px; border: 2px dashed rgba(196,113,90,0.4); border-radius: 12px; background: rgba(253,248,240,0.5); cursor: pointer; text-align: center; }
   .file-input { position: absolute; left: 0; top: 0; height: 100%; width: 100%; opacity: 0; cursor: pointer; }
-  .btn-submit { width: 100%; background: var(--terracotta); color: white; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: 500; cursor: pointer; margin-top: 10px; }
-  .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-  #statusMessage { text-align: center; margin-top: 15px; font-weight: 500; }
+  
+  .btn-submit { width: 100%; background: var(--terracotta); color: white; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: 500; cursor: pointer; margin-top: 10px; box-shadow: 0 6px 20px rgba(196,113,90,0.2); transition: 0.3s; }
+  .btn-submit:hover { background: var(--chocolate); transform: translateY(-2px); }
+  .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+  
+  #statusMessage, #orderStatusMessage { text-align: center; margin-top: 15px; font-weight: 500; }
   .success { color: #27ae60; } .error { color: #c0392b; }
   
-  /* Management List Styles */
   hr { border: none; border-top: 1px solid rgba(74,44,26,0.15); margin: 40px 0; }
+  
+  /* Management List & Order Panel Styles */
   .item-list { display: flex; flex-direction: column; gap: 15px; }
-  .admin-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; border: 1px solid rgba(74,44,26,0.1); }
+  .admin-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; border: 1px solid rgba(74,44,26,0.1); box-shadow: 0 4px 15px rgba(74,44,26,0.03); }
   .item-info { display: flex; align-items: center; gap: 15px; }
   .item-info img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
   .item-title { font-weight: bold; color: var(--ink); }
-  .item-price { font-size: 0.85rem; color: var(--chocolate); }
+  .item-price { font-size: 0.85rem; color: var(--chocolate); margin-top: 4px; }
   .item-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-  .action-btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 500; transition: 0.2s; }
+  
+  .action-btn { padding: 8px 14px; border: none; border-radius: 50px; font-size: 0.8rem; cursor: pointer; font-weight: 500; transition: 0.2s; }
   .btn-hide { background: #f39c12; color: white; }
   .btn-stock { background: #3498db; color: white; }
   .btn-delete { background: #e74c3c; color: white; }
-  .action-btn:hover { opacity: 0.8; }
+  .action-btn:hover { opacity: 0.9; transform: scale(1.03); }
+
+  /* ===== MOVABLE CUTE BOT UI ===== */
+  .bot-container { position: fixed; bottom: 30px; left: 25px; display: flex; flex-direction: column; align-items: flex-start; z-index: 9999; cursor: grab; user-select: none; touch-action: none; }
+  .bot-container:active { cursor: grabbing; }
+  .bot-bubble { background: var(--bot-bubble-bg); padding: 10px 14px; border-radius: 14px; font-size: 0.78rem; font-weight: 500; color: var(--bot-bubble-text); box-shadow: 0 6px 20px rgba(0,0,0,0.15); margin-bottom: 6px; width: 150px; text-align: center; position: relative; border: 1px solid rgba(196,113,90,0.2); pointer-events: none; opacity: 1; visibility: visible; transition: opacity 0.5s ease, visibility 0.5s ease; }
+  .bot-bubble.hide-bubble { animation: blinkHide 0.8s ease forwards; }
+  .bot-bubble::after { content: ''; position: absolute; bottom: -8px; left: 20px; border-width: 8px 8px 0; border-style: solid; border-color: var(--bot-bubble-bg) transparent; display: block; width: 0; transform: scaleX(-1); }
+  
+  .cute-bot { width: 52px; height: 52px; background: var(--bot-bg); border-radius: 50% 50% 45% 45%; position: relative; box-shadow: 0 6px 20px var(--shadow); display: flex; align-items: center; justify-content: center; animation: floatAndWobble 5s ease-in-out infinite; }
+  .bot-hat { position: absolute; top: -6px; left: 10px; width: 32px; height: 14px; background: #4A2C1A; border-radius: 20px 20px 5px 5px; transform: rotate(-12deg); }
+  .bot-face { width: 100%; height: 100%; position: relative; pointer-events: none; }
+  .bot-eyes { display: flex; justify-content: space-between; width: 26px; position: absolute; top: 22px; left: 13px; }
+  .bot-eye { width: 5.5px; height: 5.5px; background: #1A0F08; border-radius: 50%; }
+  .bot-cheeks { display: flex; justify-content: space-between; width: 36px; position: absolute; top: 26px; left: 8px; opacity: 0.6; }
+  .bot-cheek { width: 6px; height: 4px; background: #ff7675; border-radius: 50%; filter: blur(0.5px); }
+  .paint-badge { position: absolute; bottom: 5px; right: 6px; font-size: 0.65rem; transform: rotate(15deg); }
+  .cute-bot.happy { animation: jumpBot 0.5s ease 2; }
+  .cute-bot.happy .bot-eye { height: 4px; background: transparent; border-left: 2px solid var(--ink); border-top: 2px solid var(--ink); transform: rotate(45deg); border-radius: 0; }
+
+  @keyframes blinkHide { 0% { opacity: 1; transform: scale(1); } 25% { opacity: 0.4; } 50% { opacity: 0.8; } 75% { opacity: 0.2; } 100% { opacity: 0; visibility: hidden; transform: scale(0.9); } }
+  @keyframes floatAndWobble { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-5px) rotate(-3deg); } 50% { transform: translateY(2px) rotate(2deg); } 75% { transform: translateY(-4px) rotate(-1deg); } }
+  @keyframes jumpBot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  
+  @media (max-width: 600px) { .admin-item { flex-direction: column; align-items: flex-start; gap: 15px; } .item-actions { width: 100%; justify-content: flex-start; } }
 </style>
 </head>
 <body>
 
+<div class="bot-container" id="draggableBotContainer">
+  <div class="bot-bubble" id="userBotBubble">Welcome Boss! Let's manage Achi's Creations! 🛠️🎨</div>
+  <div class="cute-bot" id="userArtyBot">
+    <div class="bot-hat"></div>
+    <div class="bot-face">
+      <div class="bot-cheeks"><div class="bot-cheek"></div><div class="bot-cheek"></div></div>
+      <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+      <div class="paint-badge">⚙️</div>
+    </div>
+  </div>
+</div>
+
 <div class="admin-container">
-  <h2>Add New Design 🎨</h2>
+  <h2>Add New <em>Design</em> 🎨</h2>
   <form id="uploadForm">
     <div class="form-group"><label>Design Name</label><input type="text" id="designName" placeholder="e.g., Silk Floral Saree" required></div>
     
     <div class="form-group">
       <label>Price / Value Info</label>
-      <input type="text" id="designPrice" placeholder="e.g., 4500 or Call for Price / Depends on size" required>
+      <input type="text" id="designPrice" placeholder="e.g., 4500 (Leave blank or type 0 for 'Price On Size')" required>
     </div>
     
     <div class="form-group">
@@ -55,7 +108,7 @@
         <option value="" disabled selected>Select Category</option>
         <option value="saree">Saree</option>
         <option value="batik">Batik</option>
-        <option value="kurta">Kurta</option>
+        <option value="kurta">Handcraft</option>
         <option value="pencil">Pencil Art</option>
         <option value="styrofoam">Styrofoam Art</option>
         <option value="wallart">Wall Art</option>
@@ -69,7 +122,34 @@
   <div id="statusMessage"></div>
 
   <hr>
-  <h2>Manage Designs 🛠️</h2>
+
+  <h2>Order <em>Tracking</em> Manager 📦</h2>
+  <p style="font-size:0.85rem; text-align:center; color:var(--chocolate); margin-bottom:20px;">Enter tracking code from WhatsApp to add/update status.</p>
+  
+  <form id="orderStatusForm">
+    <div class="form-group">
+      <label>Tracking Code *</label>
+      <input type="text" id="trackCodeInput" placeholder="e.g., ACHI-2026-1234" required>
+    </div>
+    <div class="form-group">
+      <label>Order Current Status</label>
+      <select id="trackStatusInput" required>
+        <option value="Pending ⏳">Pending ⏳ (Order Received)</option>
+        <option value="Processing 🎨">Processing 🎨 (Artwork in Progress)</option>
+        <option value="Shipped 🚚">Shipped 🚚 (Handed to Courier)</option>
+        <option value="Delivered 🎉">Delivered 🎉 (Completed)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Admin Private Notes (Optional)</label>
+      <textarea id="trackNotesInput" rows="2" placeholder="e.g., Customer requested urgent shipping before Friday."></textarea>
+    </div>
+    <button type="submit" class="btn-submit" id="orderStatusBtn" style="background:var(--chocolate)">⚙️ Update Order Status</button>
+  </form>
+  <div id="orderStatusMessage"></div>
+
+  <hr>
+  <h2>Manage <em>Designs</em> 🛠️</h2>
   <div class="item-list" id="adminItemsList">
     <p style="text-align:center; color:gray;">Loading designs...</p>
   </div>
@@ -77,7 +157,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCN--jld9RjWhTCanIlqvHd_V7PuSGR_Ic",
@@ -93,6 +173,24 @@
   
   const imgbbApiKey = "73fff8dfce6ca7106d714fd18beccd65";
 
+  // --- ARTY BOT TEXT CONTROLLER & AUTO-HIDE (7 SECONDS) ---
+  const userBotBubble = document.getElementById('userBotBubble');
+  const userArtyBot = document.getElementById('userArtyBot');
+  const botContainer = document.getElementById('draggableBotContainer');
+  let bubbleTimer = null;
+
+  function showBotBubble(text) {
+    if (bubbleTimer) clearTimeout(bubbleTimer);
+    userBotBubble.innerText = text;
+    userBotBubble.classList.remove('hide-bubble');
+    userBotBubble.style.opacity = '1';
+    userBotBubble.style.visibility = 'visible';
+    bubbleTimer = setTimeout(() => { userBotBubble.classList.add('hide-bubble'); }, 7000);
+  }
+
+  setTimeout(() => { showBotBubble("Need to update an order status? Use the tracking form below! 📦"); }, 3000);
+
+  // --- DESIGN UPLOAD CONTROLLER ---
   document.getElementById('designImage').addEventListener('change', function() {
     if(this.files[0]) document.getElementById('fileLabel').innerText = "✅ " + this.files[0].name;
   });
@@ -106,10 +204,14 @@
     submitBtn.innerText = "Uploading Image...";
     statusMsg.innerText = "";
     
-    const name = document.getElementById('designName').value;
-    const price = document.getElementById('designPrice').value;
-    const category = document.getElementById('designCategory').value;
-    const imageFile = document.getElementById('designImage').files[0];
+    let name = document.getElementById('designName').value;
+    let price = document.getElementById('designPrice').value;
+    let category = document.getElementById('designCategory').value;
+    let imageFile = document.getElementById('designImage').files[0];
+
+    if(!price || price.trim() === '0' || price.toLowerCase() === 'n/a') {
+      price = 'N/A';
+    }
 
     const formData = new FormData();
     formData.append("image", imageFile);
@@ -123,12 +225,11 @@
 
       if(data.success) {
         const imageUrl = data.data.display_url;
-        
         submitBtn.innerText = "Saving to Database...";
 
         await addDoc(collection(db, "designs"), {
           name: name, 
-          price: price, // Saves string or custom message smoothly
+          price: price, 
           category: category, 
           imageUrl: imageUrl, 
           isHidden: false, 
@@ -138,6 +239,7 @@
 
         statusMsg.className = "success";
         statusMsg.innerText = "🎉 Design Added Successfully!";
+        showBotBubble("Awesome! Added the new design to your website catalog! 🎨✨");
         document.getElementById('uploadForm').reset();
         document.getElementById('fileLabel').innerText = "📸 Choose Image";
 
@@ -147,13 +249,52 @@
     } catch (error) {
       console.error(error);
       statusMsg.className = "error";
-      statusMsg.innerText = "❌ Something went wrong. Try again.";
+      statusMsg.innerText = "❌ Image upload failed. Please check internet connection.";
     } finally {
       submitBtn.disabled = false; 
       submitBtn.innerText = "✦ Add Design";
     }
   });
 
+  // --- ORDER TRACKING STATUS UPDATER LOGIC ---
+  document.getElementById('orderStatusForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const statusBtn = document.getElementById('orderStatusBtn');
+    const orderStatusMsg = document.getElementById('orderStatusMessage');
+    
+    statusBtn.disabled = true;
+    statusBtn.innerText = "Updating Order...";
+    orderStatusMsg.innerText = "";
+
+    const rawCode = document.getElementById('trackCodeInput').value.trim().toUpperCase();
+    const orderStatus = document.getElementById('trackStatusInput').value;
+    const adminNotes = document.getElementById('trackNotesInput').value.trim();
+
+    try {
+      // Save or Overwrite status using the Tracking Code as Document ID directly!
+      await setDoc(doc(db, "orders", rawCode), {
+        trackingCode: rawCode,
+        status: orderStatus,
+        notes: adminNotes ? adminNotes : 'No notes added.',
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      orderStatusMsg.className = "success";
+      orderStatusMsg.innerText = `🎉 Status for ${rawCode} updated to [${orderStatus}]!`;
+      showBotBubble(`Order status successfully synced to server! Tracking ID: ${rawCode} 🚚`);
+      document.getElementById('orderStatusForm').reset();
+
+    } catch (error) {
+      console.error("Order status update error: ", error);
+      orderStatusMsg.className = "error";
+      orderStatusMsg.innerText = "❌ Failed to update order. Check permissions.";
+    } finally {
+      statusBtn.disabled = false;
+      statusBtn.innerText = "⚙️ Update Order Status";
+    }
+  });
+
+  // --- REALTIME DESIGNS MANAGEMENT STREAM ---
   const listContainer = document.getElementById('adminItemsList');
   const q = query(collection(db, "designs"), orderBy("createdAt", "desc"));
   
@@ -166,19 +307,19 @@
       const docId = documentSnapshot.id;
       
       const hideText = data.isHidden ? "👁️ Unhide" : "🚫 Hide";
-      const stockText = data.inStock ? "📉 Mark Out of Stock" : "📈 Mark In Stock";
+      const stockText = data.inStock ? "📉 Out of Stock" : "📈 In Stock";
       const itemOpacity = data.isHidden ? "0.5" : "1";
 
-      // Display logic gracefully manages normal prices or strings like 'Call'
-      const displayPrice = isNaN(data.price) ? data.price : `Rs. ${data.price}`;
+      const displayPrice = (data.price === 'N/A' || !data.price) ? 'Price: On Size' : `Rs. ${data.price}`;
 
       listContainer.innerHTML += `
         <div class="admin-item" style="opacity: ${itemOpacity};">
           <div class="item-info">
             <img src="${data.imageUrl}" alt="img">
             <div>
-              <div class="item-title">${data.name} ${data.isHidden ? '(Hidden)' : ''}</div>
-              <div class="item-price">${displayPrice} | ${data.inStock ? '✅ In Stock' : '❌ Out of Stock'}</div>
+              <div class="item-title">${data.name} ${data.isHidden ? '<span style="color:orange; font-size:0.8rem;">(Hidden)</span>' : ''}</div>
+              <div class="item-price">${displayPrice} | ${data.inStock ? '<span style="color:green;">✅ In Stock</span>' : '<span style="color:red;">❌ Out of Stock</span>'}</div>
+              <div style="font-size:0.75rem; color:gray; text-transform:uppercase; margin-top:2px;">Category: ${data.category}</div>
             </div>
           </div>
           <div class="item-actions">
@@ -195,6 +336,67 @@
   window.toggleStock = async (id, currentStatus) => { await updateDoc(doc(db, "designs", id), { inStock: !currentStatus }); };
   window.toggleDelete = async (id) => { if(confirm("Are you sure you want to delete this design forever?")) { await deleteDoc(doc(db, "designs", id)); } };
 </script>
+
+<script>
+  // --- DRAGGABLE BOT JAVASCRIPT CONTROLLER ---
+  const adminBot = document.getElementById('userArtyBot');
+  const draggableContainer = document.getElementById('draggableBotContainer');
+  const botQuotes = [
+    "Tip: Leave Price blank or 0 to show 'Price: On Size' automatically! 💡",
+    "Hiding an item removes it from user view instantly but keeps it safe in DB! 👁️",
+    "Marking an item 'Out of Stock' changes the button to gray on main page! 📉",
+    "Once you update a status, it stays saved under that specific Tracking Code! 📦",
+    "Woohoo! Thanks for rearranging my workspace! Let's build! 🚀"
+  ];
+
+  let isDragging = false;
+  let startX, startY;
+
+  draggableContainer.addEventListener('mousedown', dragStart);
+  draggableContainer.addEventListener('touchstart', dragStart, { passive: true });
+  window.addEventListener('mousemove', dragMove);
+  window.addEventListener('touchmove', dragMove, { passive: false });
+  window.addEventListener('mouseup', dragEnd);
+  window.addEventListener('touchend', dragEnd);
+
+  function dragStart(e) {
+    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+    isDragging = true;
+    adminBot.style.animation = 'none';
+    startX = clientX - draggableContainer.offsetLeft;
+    startY = clientY - draggableContainer.offsetTop;
+  }
+
+  function dragMove(e) {
+    if (!isDragging) return;
+    if(e.type === 'touchmove') e.preventDefault();
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    let x = clientX - startX; let y = clientY - startY;
+    const padding = 10;
+    x = Math.max(padding, Math.min(x, window.innerWidth - draggableContainer.offsetWidth - padding));
+    y = Math.max(padding, Math.min(y, window.innerHeight - draggableContainer.offsetHeight - padding));
+    draggableContainer.style.left = x + 'px'; draggableContainer.style.top = y + 'px'; draggableContainer.style.bottom = 'auto';
+  }
+
+  function dragEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    adminBot.style.animation = 'floatAndWobble 5s ease-in-out infinite';
+    pokeAdminBot();
+  }
+
+  adminBot.addEventListener('click', () => { if(!isDragging) pokeAdminBot(); });
+
+  function pokeAdminBot() {
+    adminBot.classList.add('happy');
+    const randomIdx = Math.floor(Math.random() * botQuotes.length);
+    showBotBubble(botQuotes[randomIdx]);
+    setTimeout(() => { adminBot.classList.remove('happy'); }, 1000);
+  }
+</script>
+
 </body>
 </html>
 
