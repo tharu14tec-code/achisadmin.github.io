@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Achi's creation - Admin Panel</title>
+<title>Achi's creation - Admin Panel (V2)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root { 
@@ -21,9 +21,15 @@
   h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--terracotta); text-align: center; margin-bottom: 30px; }
   h2 em { font-style: italic; color: var(--gold); }
   
+  /* V2 ANALYTICS DASHBOARD */
+  .analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
+  .analytics-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid rgba(74,44,26,0.08); text-align: center; box-shadow: 0 4px 15px rgba(74,44,26,0.02); }
+  .analytics-card h4 { font-size: 0.8rem; text-transform: uppercase; color: var(--chocolate); letter-spacing: 0.05em; margin-bottom: 8px; }
+  .analytics-card .counter-value { font-size: 1.8rem; font-weight: 700; color: var(--terracotta); font-family: 'Playfair Display', serif; }
+
   .form-group { margin-bottom: 22px; }
   label { display: block; font-size: 0.88rem; font-weight: 500; color: var(--chocolate); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
-  input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(74,44,26,0.15); background: var(--cream); font-size: 0.95rem; outline: none; color: var(--ink); }
+  input[type="text"], input[type="number"], input[type="tel"], select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(74,44,26,0.15); background: var(--cream); font-size: 0.95rem; outline: none; color: var(--ink); }
   input:focus, select:focus, textarea:focus { border-color: var(--terracotta); }
   
   .file-drop-area { position: relative; display: flex; align-items: center; justify-content: center; padding: 25px; border: 2px dashed rgba(196,113,90,0.4); border-radius: 12px; background: rgba(253,248,240,0.5); cursor: pointer; text-align: center; }
@@ -33,12 +39,12 @@
   .btn-submit:hover { background: var(--chocolate); transform: translateY(-2px); }
   .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   
-  #statusMessage, #orderStatusMessage { text-align: center; margin-top: 15px; font-weight: 500; }
+  #statusMessage, #orderStatusMessage, #promoStatusMessage { text-align: center; margin-top: 15px; font-weight: 500; }
   .success { color: #27ae60; } .error { color: #c0392b; }
   
   hr { border: none; border-top: 1px solid rgba(74,44,26,0.15); margin: 40px 0; }
   
-  /* Management List & Order Panel Styles */
+  /* Management List Styles */
   .item-list { display: flex; flex-direction: column; gap: 15px; }
   .admin-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; border: 1px solid rgba(74,44,26,0.1); box-shadow: 0 4px 15px rgba(74,44,26,0.03); }
   .item-info { display: flex; align-items: center; gap: 15px; }
@@ -75,7 +81,7 @@
   @keyframes floatAndWobble { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-5px) rotate(-3deg); } 50% { transform: translateY(2px) rotate(2deg); } 75% { transform: translateY(-4px) rotate(-1deg); } }
   @keyframes jumpBot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
   
-  @media (max-width: 600px) { .admin-item { flex-direction: column; align-items: flex-start; gap: 15px; } .item-actions { width: 100%; justify-content: flex-start; } }
+  @media (max-width: 600px) { .analytics-grid { grid-template-columns: 1fr; gap: 10px; } .admin-item { flex-direction: column; align-items: flex-start; gap: 15px; } .item-actions { width: 100%; justify-content: flex-start; } }
 </style>
 </head>
 <body>
@@ -87,12 +93,31 @@
     <div class="bot-face">
       <div class="bot-cheeks"><div class="bot-cheek"></div><div class="bot-cheek"></div></div>
       <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-      <div class="paint-badge">⚙️</div>
+      <div class="paint-badge">🛠️</div>
     </div>
   </div>
 </div>
 
 <div class="admin-container">
+  <!-- V2 LIVE ANALYTICS METRICS -->
+  <h2>Live <em>Analytics</em> 📊</h2>
+  <div class="analytics-grid">
+    <div class="analytics-card">
+      <h4>Total Visitors 👥</h4>
+      <div class="counter-value" id="countVisitors">0</div>
+    </div>
+    <div class="analytics-card">
+      <h4>Total Designs 🎨</h4>
+      <div class="counter-value" id="countDesigns">0</div>
+    </div>
+    <div class="analytics-card">
+      <h4>Total Orders 📦</h4>
+      <div class="counter-value" id="countOrders">0</div>
+    </div>
+  </div>
+
+  <hr>
+
   <h2>Add New <em>Design</em> 🎨</h2>
   <form id="uploadForm">
     <div class="form-group"><label>Design Name</label><input type="text" id="designName" placeholder="e.g., Silk Floral Saree" required></div>
@@ -149,6 +174,27 @@
   <div id="orderStatusMessage"></div>
 
   <hr>
+
+  <!-- V2: PROMO CODE MANAGER SECTION -->
+  <h2>Promo Code <em>Manager</em> 🏷️</h2>
+  <form id="promoForm">
+    <div class="form-group">
+      <label>Promo Code Text *</label>
+      <input type="text" id="promoCodeName" placeholder="e.g., ACHI10" style="text-transform:uppercase;" required>
+    </div>
+    <div class="form-group">
+      <label>Discount Percentage (%) *</label>
+      <input type="number" id="promoDiscount" placeholder="e.g., 10" min="1" max="100" required>
+    </div>
+    <button type="submit" class="btn-submit" id="promoSubmitBtn" style="background:var(--deep-gold)">✦ Add Promo Code</button>
+  </form>
+  <div id="promoStatusMessage"></div>
+  
+  <div class="item-list" id="adminPromoList" style="margin-top:20px;">
+    <!-- Active Promos stream -->
+  </div>
+
+  <hr>
   <h2>Manage <em>Designs</em> 🛠️</h2>
   <div class="item-list" id="adminItemsList">
     <p style="text-align:center; color:gray;">Loading designs...</p>
@@ -173,7 +219,7 @@
   
   const imgbbApiKey = "73fff8dfce6ca7106d714fd18beccd65";
 
-  // --- ARTY BOT TEXT CONTROLLER & AUTO-HIDE (7 SECONDS) ---
+  // --- ARTY BOT CONTROLLER ---
   const userBotBubble = document.getElementById('userBotBubble');
   const userArtyBot = document.getElementById('userArtyBot');
   const botContainer = document.getElementById('draggableBotContainer');
@@ -188,7 +234,18 @@
     bubbleTimer = setTimeout(() => { userBotBubble.classList.add('hide-bubble'); }, 7000);
   }
 
-  setTimeout(() => { showBotBubble("Need to update an order status? Use the tracking form below! 📦"); }, 3000);
+  // --- V2: LIVE ANALYTICS COUNTERS MODULE ---
+  onSnapshot(doc(db, "analytics", "counters"), (snapshot) => {
+    if (snapshot.exists()) {
+      document.getElementById('countVisitors').innerText = snapshot.data().visitor_count || 0;
+    }
+  });
+  onSnapshot(collection(db, "designs"), (snap) => {
+    document.getElementById('countDesigns').innerText = snap.size;
+  });
+  onSnapshot(collection(db, "orders"), (snap) => {
+    document.getElementById('countOrders').innerText = snap.size;
+  });
 
   // --- DESIGN UPLOAD CONTROLLER ---
   document.getElementById('designImage').addEventListener('change', function() {
@@ -200,27 +257,20 @@
     const submitBtn = document.getElementById('submitBtn');
     const statusMsg = document.getElementById('statusMessage');
     
-    submitBtn.disabled = true; 
-    submitBtn.innerText = "Uploading Image...";
-    statusMsg.innerText = "";
+    submitBtn.disabled = true; submitBtn.innerText = "Uploading Image..."; statusMsg.innerText = "";
     
     let name = document.getElementById('designName').value;
     let price = document.getElementById('designPrice').value;
     let category = document.getElementById('designCategory').value;
     let imageFile = document.getElementById('designImage').files[0];
 
-    if(!price || price.trim() === '0' || price.toLowerCase() === 'n/a') {
-      price = 'N/A';
-    }
+    if(!price || price.trim() === '0' || price.toLowerCase() === 'n/a') { price = 'N/A'; }
 
     const formData = new FormData();
     formData.append("image", imageFile);
 
     try {
-      const response = await fetch("https://api.imgbb.com/1/upload?key=" + imgbbApiKey, {
-        method: "POST",
-        body: formData
-      });
+      const response = await fetch("https://api.imgbb.com/1/upload?key=" + imgbbApiKey, { method: "POST", body: formData });
       const data = await response.json();
 
       if(data.success) {
@@ -228,70 +278,81 @@
         submitBtn.innerText = "Saving to Database...";
 
         await addDoc(collection(db, "designs"), {
-          name: name, 
-          price: price, 
-          category: category, 
-          imageUrl: imageUrl, 
-          isHidden: false, 
-          inStock: true,
-          createdAt: serverTimestamp()
+          name: name, price: price, category: category, imageUrl: imageUrl, isHidden: false, inStock: true, createdAt: serverTimestamp()
         });
 
-        statusMsg.className = "success";
-        statusMsg.innerText = "🎉 Design Added Successfully!";
+        statusMsg.className = "success"; statusMsg.innerText = "🎉 Design Added Successfully!";
         showBotBubble("Awesome! Added the new design to your website catalog! 🎨✨");
         document.getElementById('uploadForm').reset();
         document.getElementById('fileLabel').innerText = "📸 Choose Image";
-
-      } else {
-        throw new Error("Image Upload Failed");
-      }
+      } else { throw new Error("Upload Failed"); }
     } catch (error) {
-      console.error(error);
-      statusMsg.className = "error";
-      statusMsg.innerText = "❌ Image upload failed. Please check internet connection.";
-    } finally {
-      submitBtn.disabled = false; 
-      submitBtn.innerText = "✦ Add Design";
-    }
+      statusMsg.className = "error"; statusMsg.innerText = "❌ Image upload failed.";
+    } finally { submitBtn.disabled = false; submitBtn.innerText = "✦ Add Design"; }
   });
 
-  // --- ORDER TRACKING STATUS UPDATER LOGIC ---
+  // --- ORDER TRACKING STATUS UPDATER ---
   document.getElementById('orderStatusForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const statusBtn = document.getElementById('orderStatusBtn');
     const orderStatusMsg = document.getElementById('orderStatusMessage');
     
-    statusBtn.disabled = true;
-    statusBtn.innerText = "Updating Order...";
-    orderStatusMsg.innerText = "";
-
+    statusBtn.disabled = true; statusBtn.innerText = "Updating Order..."; orderStatusMsg.innerText = "";
     const rawCode = document.getElementById('trackCodeInput').value.trim().toUpperCase();
     const orderStatus = document.getElementById('trackStatusInput').value;
     const adminNotes = document.getElementById('trackNotesInput').value.trim();
 
     try {
-      // Save or Overwrite status using the Tracking Code as Document ID directly!
       await setDoc(doc(db, "orders", rawCode), {
-        trackingCode: rawCode,
-        status: orderStatus,
-        notes: adminNotes ? adminNotes : 'No notes added.',
-        updatedAt: serverTimestamp()
+        trackingCode: rawCode, status: orderStatus, notes: adminNotes ? adminNotes : 'No notes.', updatedAt: serverTimestamp()
       }, { merge: true });
 
-      orderStatusMsg.className = "success";
-      orderStatusMsg.innerText = `🎉 Status for ${rawCode} updated to [${orderStatus}]!`;
-      showBotBubble(`Order status successfully synced to server! Tracking ID: ${rawCode} 🚚`);
+      orderStatusMsg.className = "success"; orderStatusMsg.innerText = `🎉 Status for ${rawCode} updated!`;
+      showBotBubble(`Order status synchronized to client front-end database! 🚚`);
       document.getElementById('orderStatusForm').reset();
-
     } catch (error) {
-      console.error("Order status update error: ", error);
-      orderStatusMsg.className = "error";
-      orderStatusMsg.innerText = "❌ Failed to update order. Check permissions.";
-    } finally {
-      statusBtn.disabled = false;
-      statusBtn.innerText = "⚙️ Update Order Status";
-    }
+      orderStatusMsg.className = "error"; orderStatusMsg.innerText = "❌ Failed to update order.";
+    } finally { statusBtn.disabled = false; statusBtn.innerText = "⚙️ Update Order Status"; }
+  });
+
+  // --- V2: PROMO CODE SAVE LOGIC ---
+  document.getElementById('promoForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const pBtn = document.getElementById('promoSubmitBtn');
+    const pMsg = document.getElementById('promoStatusMessage');
+    
+    pBtn.disabled = true; pBtn.innerText = "Saving Code..."; pMsg.innerText = "";
+    const pName = document.getElementById('promoCodeName').value.trim().toUpperCase();
+    const pValue = parseInt(document.getElementById('promoDiscount').value);
+
+    try {
+      await setDoc(doc(db, "promocodes", pName), {
+        code: pName, discount: pValue, createdAt: serverTimestamp()
+      });
+      pMsg.className = "success"; pMsg.innerText = "🎉 Promo Code added successfully!";
+      showBotBubble(`Promo code ${pName} is now live and working on the website! 💸`);
+      document.getElementById('promoForm').reset();
+    } catch (err) {
+      pMsg.className = "error"; pMsg.innerText = "❌ Failed to save promo code.";
+    } finally { pBtn.disabled = false; pBtn.innerText = "✦ Add Promo Code"; }
+  });
+
+  // --- V2: REALTIME PROMO CODES LIST STREAM ---
+  const promoContainer = document.getElementById('adminPromoList');
+  onSnapshot(query(collection(db, "promocodes"), orderBy("createdAt", "desc")), (snap) => {
+    promoContainer.innerHTML = '';
+    if(snap.empty) { promoContainer.innerHTML = '<p style="text-align:center; font-size:0.85rem; color:gray;">No active promo codes.</p>'; return; }
+    snap.forEach((dDoc) => {
+      const pData = dDoc.data();
+      promoContainer.innerHTML += `
+        <div class="admin-item" style="padding:10px 15px; border-color:var(--rose);">
+          <div>
+            <span style="font-weight:bold; color:var(--terracotta); background:rgba(232,114,90,0.1); padding:4px 8px; border-radius:6px; font-family:monospace;">${pData.code}</span>
+            <span style="font-size:0.9rem; margin-left:10px; font-weight:500;">Discount: ${pData.discount}% Off</span>
+          </div>
+          <button class="action-btn btn-delete" onclick="deletePromo('${dDoc.id}')">🗑️ Delete</button>
+        </div>`;
+    });
   });
 
   // --- REALTIME DESIGNS MANAGEMENT STREAM ---
@@ -305,11 +366,9 @@
     snapshot.forEach((documentSnapshot) => {
       const data = documentSnapshot.data();
       const docId = documentSnapshot.id;
-      
       const hideText = data.isHidden ? "👁️ Unhide" : "🚫 Hide";
       const stockText = data.inStock ? "📉 Out of Stock" : "📈 In Stock";
       const itemOpacity = data.isHidden ? "0.5" : "1";
-
       const displayPrice = (data.price === 'N/A' || !data.price) ? 'Price: On Size' : `Rs. ${data.price}`;
 
       listContainer.innerHTML += `
@@ -327,74 +386,39 @@
             <button class="action-btn btn-hide" onclick="toggleHide('${docId}', ${data.isHidden})">${hideText}</button>
             <button class="action-btn btn-delete" onclick="toggleDelete('${docId}')">🗑️ Delete</button>
           </div>
-        </div>
-      `;
+        </div>`;
     });
   });
 
   window.toggleHide = async (id, currentStatus) => { await updateDoc(doc(db, "designs", id), { isHidden: !currentStatus }); };
   window.toggleStock = async (id, currentStatus) => { await updateDoc(doc(db, "designs", id), { inStock: !currentStatus }); };
   window.toggleDelete = async (id) => { if(confirm("Are you sure you want to delete this design forever?")) { await deleteDoc(doc(db, "designs", id)); } };
+  window.deletePromo = async (id) => { if(confirm("Delete this promo code?")) { await deleteDoc(doc(db, "promocodes", id)); } };
 </script>
 
 <script>
-  // --- DRAGGABLE BOT JAVASCRIPT CONTROLLER ---
+  // --- DRAGGABLE BOT CONTROLLER ---
   const adminBot = document.getElementById('userArtyBot');
   const draggableContainer = document.getElementById('draggableBotContainer');
   const botQuotes = [
     "Tip: Leave Price blank or 0 to show 'Price: On Size' automatically! 💡",
     "Hiding an item removes it from user view instantly but keeps it safe in DB! 👁️",
     "Marking an item 'Out of Stock' changes the button to gray on main page! 📉",
-    "Once you update a status, it stays saved under that specific Tracking Code! 📦",
-    "Woohoo! Thanks for rearranging my workspace! Let's build! 🚀"
+    "Active counters are updating live using smart database streams! 👥",
+    "Promo codes deleted here will stop working on the client page instantly! 🏷️"
   ];
 
-  let isDragging = false;
-  let startX, startY;
+  let isDragging = false, startX, startY;
+  draggableContainer.addEventListener('mousedown', dragStart); draggableContainer.addEventListener('touchstart', dragStart, { passive: true });
+  window.addEventListener('mousemove', dragMove); window.addEventListener('touchmove', dragMove, { passive: false });
+  window.addEventListener('mouseup', dragEnd); window.addEventListener('touchend', dragEnd);
 
-  draggableContainer.addEventListener('mousedown', dragStart);
-  draggableContainer.addEventListener('touchstart', dragStart, { passive: true });
-  window.addEventListener('mousemove', dragMove);
-  window.addEventListener('touchmove', dragMove, { passive: false });
-  window.addEventListener('mouseup', dragEnd);
-  window.addEventListener('touchend', dragEnd);
-
-  function dragStart(e) {
-    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-    isDragging = true;
-    adminBot.style.animation = 'none';
-    startX = clientX - draggableContainer.offsetLeft;
-    startY = clientY - draggableContainer.offsetTop;
-  }
-
-  function dragMove(e) {
-    if (!isDragging) return;
-    if(e.type === 'touchmove') e.preventDefault();
-    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-    let x = clientX - startX; let y = clientY - startY;
-    const padding = 10;
-    x = Math.max(padding, Math.min(x, window.innerWidth - draggableContainer.offsetWidth - padding));
-    y = Math.max(padding, Math.min(y, window.innerHeight - draggableContainer.offsetHeight - padding));
-    draggableContainer.style.left = x + 'px'; draggableContainer.style.top = y + 'px'; draggableContainer.style.bottom = 'auto';
-  }
-
-  function dragEnd() {
-    if (!isDragging) return;
-    isDragging = false;
-    adminBot.style.animation = 'floatAndWobble 5s ease-in-out infinite';
-    pokeAdminBot();
-  }
-
+  function dragStart(e) { isDragging = true; adminBot.style.animation = 'none'; startX = ((e.type === 'touchstart') ? e.touches[0].clientX : e.clientX) - draggableContainer.offsetLeft; startY = ((e.type === 'touchstart') ? e.touches[0].clientY : e.clientY) - draggableContainer.offsetTop; }
+  function dragMove(e) { if (!isDragging) return; if(e.type === 'touchmove') e.preventDefault(); let x = ((e.type === 'touchmove') ? e.touches[0].clientX : e.clientX) - startX; let y = ((e.type === 'touchmove') ? e.touches[0].clientY : e.clientY) - startY; x = Math.max(10, Math.min(x, window.innerWidth - draggableContainer.offsetWidth - 10)); y = Math.max(10, Math.min(y, window.innerHeight - draggableContainer.offsetHeight - 10)); draggableContainer.style.left = x + 'px'; draggableContainer.style.top = y + 'px'; draggableContainer.style.bottom = 'auto'; }
+  function dragEnd() { if (!isDragging) return; isDragging = false; adminBot.style.animation = 'floatAndWobble 5s ease-in-out infinite'; pokeAdminBot(); }
   adminBot.addEventListener('click', () => { if(!isDragging) pokeAdminBot(); });
 
-  function pokeAdminBot() {
-    adminBot.classList.add('happy');
-    const randomIdx = Math.floor(Math.random() * botQuotes.length);
-    showBotBubble(botQuotes[randomIdx]);
-    setTimeout(() => { adminBot.classList.remove('happy'); }, 1000);
-  }
+  function pokeAdminBot() { adminBot.classList.add('happy'); showBotBubble(botQuotes[Math.floor(Math.random() * botQuotes.length)]); setTimeout(() => { adminBot.classList.remove('happy'); }, 1000); }
 </script>
 
 </body>
